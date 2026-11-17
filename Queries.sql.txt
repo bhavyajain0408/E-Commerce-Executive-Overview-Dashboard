@@ -1,0 +1,114 @@
+SQL QUERIES
+
+-- 1. Top 10 Profitable Products
+SELECT 
+    product_name,
+    ROUND(SUM(profit), 2) AS total_profit,
+    ROUND(SUM(sales), 2) AS total_sales,
+    SUM(quantity) AS units_sold
+FROM ecommerce_orders
+GROUP BY product_name
+ORDER BY total_profit DESC
+LIMIT 10;
+
+-- 2. Top 10 Customers by Sales
+SELECT 
+    customer_name,
+    ROUND(SUM(sales), 2) AS total_sales,
+    ROUND(SUM(profit), 2) AS total_profit,
+    COUNT(DISTINCT order_id) AS total_orders
+FROM ecommerce_orders
+WHERE customer_name != 'Unknown Customer'
+GROUP BY customer_name
+ORDER BY total_sales DESC
+LIMIT 10;
+
+-- 3. Region-wise Total Sales
+SELECT 
+    region,
+    COUNT(order_id) AS total_orders,
+    ROUND(SUM(sales), 2) AS total_sales,
+    ROUND(SUM(profit), 2) AS total_profit
+FROM ecommerce_orders
+GROUP BY region
+ORDER BY total_sales DESC;
+
+-- 4. Category-wise Average Profit
+SELECT 
+    category,
+    ROUND(AVG(profit), 2) AS avg_profit,
+    ROUND(SUM(profit), 2) AS total_profit,
+    ROUND(SUM(sales), 2) AS total_sales
+FROM ecommerce_orders
+GROUP BY category
+ORDER BY avg_profit DESC;
+
+-- 5. Highest Discount Category
+SELECT 
+    category,
+    ROUND(AVG(discount) * 100, 2) AS avg_discount_pct,
+    ROUND(MAX(discount) * 100, 2) AS max_discount_pct,
+    COUNT(*) AS order_count
+FROM ecommerce_orders
+GROUP BY category
+ORDER BY avg_discount_pct DESC;
+
+-- 6. Orders with Negative Profit
+SELECT 
+    order_id,
+    order_date,
+    customer_name,
+    product_name,
+    sales,
+    discount,
+    ROUND(profit, 2) AS profit
+FROM ecommerce_orders
+WHERE profit < 0
+ORDER BY profit ASC;
+
+-- 7. Monthly Sales Trend
+-- (Compatible with SQLite/PostgreSQL; for MySQL, replace SUBSTR(order_date, 1, 7) with DATE_FORMAT(order_date, '%Y-%m'))
+SELECT 
+    SUBSTR(order_date, 1, 7) AS year_month,
+    COUNT(order_id) AS total_orders,
+    ROUND(SUM(sales), 2) AS total_sales,
+    ROUND(SUM(profit), 2) AS total_profit
+FROM ecommerce_orders
+GROUP BY year_month
+ORDER BY year_month ASC;
+
+-- 8. Market-wise Revenue Analysis
+SELECT 
+    market,
+    COUNT(order_id) AS total_orders,
+    ROUND(SUM(sales), 2) AS total_revenue,
+    ROUND(SUM(profit), 2) AS total_profit,
+    ROUND((SUM(profit) / SUM(sales)) * 100, 2) AS profit_margin_pct
+FROM ecommerce_orders
+GROUP BY market
+ORDER BY total_revenue DESC;
+
+-- 9. Top-performing Sub-categories
+SELECT 
+    sub_category,
+    category,
+    ROUND(SUM(sales), 2) AS total_sales,
+    ROUND(SUM(profit), 2) AS total_profit,
+    SUM(quantity) AS total_quantity
+FROM ecommerce_orders
+GROUP BY sub_category, category
+ORDER BY total_sales DESC
+LIMIT 10;
+
+-- 10. Ship Mode Usage Analysis
+SELECT 
+    ship_mode,
+    COUNT(order_id) AS total_orders,
+    ROUND(COUNT(order_id) * 100.0 / (SELECT COUNT(*) FROM ecommerce_orders), 2) AS usage_pct,
+    ROUND(SUM(sales), 2) AS total_sales,
+    ROUND(AVG(shipping_cost), 2) AS avg_shipping_cost
+FROM ecommerce_orders
+GROUP BY ship_mode
+ORDER BY total_orders DESC;
+
+```
